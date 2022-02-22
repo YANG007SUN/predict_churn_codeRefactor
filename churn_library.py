@@ -2,7 +2,22 @@
 
 
 # import libraries
+from pyrsistent import optional
+import shap
+import joblib
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns; sns.set()
 
+from sklearn.preprocessing import normalize
+from sklearn.model_selection import train_test_split
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import GridSearchCV
+
+from sklearn.metrics import plot_roc_curve, classification_report
 
 
 
@@ -15,7 +30,7 @@ def import_data(pth):
     output:
             df: pandas dataframe
     '''	
-	pass
+    return pd.read_csv(pth,index_col=0)
 
 
 def perform_eda(df):
@@ -27,10 +42,37 @@ def perform_eda(df):
     output:
             None
     '''
-	pass
+    # change target variable to 0->existing customer. 1-> chruned customer.
+    df['Churn']=df['Attrition_Flag'].apply(lambda val:0 if val=='Existing Customer' else 1)
+
+    # plot histgram
+    val=['Churn','Customer_Age']
+    plt.figure(figsize=(20,10))
+    for v in val:
+        df[v].hist()
+        plt.title(f'{v} distribution')
+        plt.savefig(f'./images/{v}_histgram.png')
+
+    # bar plot
+    df.Marital_Status.value_counts('normalize').plot(kind='bar')
+    plt.title('Martital Status')
+    plt.savefig('./images/Martital_status.png')
+
+    # distplot
+    sns.displot(df['Total_Trans_Ct'],aspect=20/10)
+    plt.title('Total_Trans_Ct')
+    plt.savefig('./images/Total_Trans_Ct.png')
+
+    # heatmap
+    plt.figure(figsize=(20,10)) 
+    sns.heatmap(df.corr(), annot=False, cmap='Dark2_r', linewidths = 2)
+    plt.title('Correlation between Vars')
+    plt.savefig('./images/Corr_plot.png')
 
 
-def encoder_helper(df, category_lst, response):
+
+
+def encoder_helper(df, category_lst, response:optional):
     '''
     helper function to turn each categorical column into a new column with
     propotion of churn for each category - associated with cell 15 from the notebook
@@ -43,13 +85,35 @@ def encoder_helper(df, category_lst, response):
     output:
             df: pandas dataframe with new columns for
     '''
-    pass
+    y = df['Churn'] 
+    X = pd.DataFrame()
+    
+    # create target encoding for all categorical variables
+    category_lst=['Gender','Education_Level','Marital_Status','Income_Category','Card_Category']
+    for col in category_lst:
+        temp_list=[]
+        groups=df.groupby(col).mean()['Churn']
+        for val in df[col]:
+                temp_list.append(groups.loc[val])
+        df[f'{col}_Churn']=temp_list
 
+    # create cols to keep and add to new X df.
+    keep_cols = ['Customer_Age', 'Dependent_count', 'Months_on_book',
+             'Total_Relationship_Count', 'Months_Inactive_12_mon',
+             'Contacts_Count_12_mon', 'Credit_Limit', 'Total_Revolving_Bal',
+             'Avg_Open_To_Buy', 'Total_Amt_Chng_Q4_Q1', 'Total_Trans_Amt',
+             'Total_Trans_Ct', 'Total_Ct_Chng_Q4_Q1', 'Avg_Utilization_Ratio',
+             'Gender_Churn', 'Education_Level_Churn', 'Marital_Status_Churn', 
+             'Income_Category_Churn', 'Card_Category_Churn']
 
-def perform_feature_engineering(df, response):
+    X[keep_cols] = df[keep_cols]
+    return X,y
+
+def perform_feature_engineering(X,y, response:optional):
     '''
     input:
-              df: pandas dataframe
+              X: pandas dataframe of all X variables (should be all numerical variables)
+              y: pandas series includes target variables (should be numerical binary variable)
               response: string of response name [optional argument that could be used for naming variables or index y column]
 
     output:
@@ -58,6 +122,9 @@ def perform_feature_engineering(df, response):
               y_train: y training data
               y_test: y testing data
     '''
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size= 0.3, random_state=42)
+
+    return X_train, X_test, y_train, y_test
 
 def classification_report_image(y_train,
                                 y_test,
@@ -107,3 +174,8 @@ def train_models(X_train, X_test, y_train, y_test):
               None
     '''
     pass
+
+
+if __name__=='__main__':
+     df=import_data('./data/bank_data.csv')
+     perform_eda(df)
