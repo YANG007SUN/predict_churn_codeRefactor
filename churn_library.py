@@ -49,26 +49,26 @@ def perform_eda(dataframe):
     for value in histgram_val:
         dataframe[value].hist()
         plt.title(f'{value} distribution')
-        plt.savefig(f'./images/{value}_histgram.png')
+        plt.savefig(f'./images/eda/{value}_histgram.png')
         plt.close()
 
     # bar plot
     dataframe.Marital_Status.value_counts('normalize').plot(kind='bar')
     plt.title('Martital Status')
-    plt.savefig('./images/Martital_status.png')
+    plt.savefig('./images/eda/Martital_status.png')
     plt.close()
 
     # distplot
     sns.displot(dataframe['Total_Trans_Ct'], aspect=20 / 10)
     plt.title('Total_Trans_Ct')
-    plt.savefig('./images/Total_Trans_Ct.png')
+    plt.savefig('./images/eda/Total_Trans_Ct.png')
     plt.close()
 
     # heatmap
     plt.figure(figsize=(20, 10))
     sns.heatmap(dataframe.corr(), annot=False, cmap='Dark2_r', linewidths=2)
     plt.title('Correlation between Vars')
-    plt.savefig('./images/Corr_plot.png')
+    plt.savefig('./images/eda/Corr_plot.png')
     plt.close()
 
 
@@ -172,7 +172,7 @@ def classification_report_file(y_train,
     plt.text(0.01, 0.7, str(classification_report(y_train, y_train_preds_rf)), {
         'fontsize': 14}, fontproperties='monospace')  # approach improved by OP -> monospace!
     plt.axis('off')
-    plt.savefig('./images/RandomForest_train_test_results.png')
+    plt.savefig('./images/model_results/RandomForest_train_test_results.png')
     plt.close()
 
     plt.rc('figure', figsize=(8, 6))
@@ -185,7 +185,7 @@ def classification_report_file(y_train,
     plt.text(0.01, 0.7, str(classification_report(y_test, y_test_preds_lr)), {
         'fontsize': 14}, fontproperties='monospace')  # approach improved by OP -> monospace!
     plt.axis('off')
-    plt.savefig('./images/Logistic_regression_train_test_results.png')
+    plt.savefig('./images/model_results/Logistic_regression_train_test_results.png')
     plt.close()
 
 
@@ -242,7 +242,7 @@ def roc_curve(rf_model, lr_model, X_test, y_test):
     ax = plt.gca()
     rfc_disp = plot_roc_curve(rf_model, X_test, y_test, ax=ax, alpha=0.8)
     lrc_plot.plot(ax=ax, alpha=0.8)
-    plt.savefig('./images/roc_curve.png')
+    plt.savefig('./images/model_results/roc_curve.png')
     plt.close()
 
 

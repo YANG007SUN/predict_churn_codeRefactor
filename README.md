@@ -5,7 +5,7 @@ Author: Peter
 Date: 23rd Feburary 2022
 
 ## Project Description
-In this project, we will identify credit card customers that are most likely to churn. The Project will include a Python package for a machine learning project that follows coding (PEP8) and engineering best practices for implementing software (modular, documented, and tested). The package will also have the flexibility of being run interactively or from the command-line interface (CLI).
+In this project, I identified credit card customers that are most likely to churn. The Project includes a Python package for a machine learning project that follows coding (PEP8) and engineering best practices for implementing software (modular, documented, and tested). The package also has the flexibility of being run interactively or from the command-line interface (CLI).
 
 ## Project files
 `churn_library.py`: python file for creating models<br>
@@ -47,3 +47,4 @@ README.md
 `churn_library.py`: Including functions for creating models.
 
 `churn_script_logging_and_tests.py`: Including functions for testing the functions inside `churn_library.py` file. It will generate logs inside `logs` folder.
+

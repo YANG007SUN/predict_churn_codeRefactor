@@ -62,7 +62,7 @@ def test_eda():
         'Total_Trans_Ct']
     for plot in list_of_plots:
         try:
-            assert os.path.isfile(f'./images/{plot}.png') is True
+            assert os.path.isfile(f'./images/eda/{plot}.png') is True
             logging.info(f'SUCESS: {plot}.png is created.')
         except AssertionError:
             logging.error(f'ERROR: {plot} was not found.')
