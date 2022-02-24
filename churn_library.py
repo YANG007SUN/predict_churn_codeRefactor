@@ -41,9 +41,6 @@ def perform_eda(df):
     output:
             None
     '''
-    # change target variable to 0->existing customer. 1-> chruned customer.
-    df['Churn']=df['Attrition_Flag'].apply(lambda val:0 if val=='Existing Customer' else 1)
-
     # plot histgram
     val=['Churn','Customer_Age']
     plt.figure(figsize=(20,10))
@@ -51,23 +48,26 @@ def perform_eda(df):
         df[v].hist()
         plt.title(f'{v} distribution')
         plt.savefig(f'./images/{v}_histgram.png')
+        plt.close()
 
     # bar plot
     df.Marital_Status.value_counts('normalize').plot(kind='bar')
     plt.title('Martital Status')
     plt.savefig('./images/Martital_status.png')
+    plt.close()
 
     # distplot
     sns.displot(df['Total_Trans_Ct'],aspect=20/10)
     plt.title('Total_Trans_Ct')
     plt.savefig('./images/Total_Trans_Ct.png')
+    plt.close()
 
     # heatmap
     plt.figure(figsize=(20,10)) 
     sns.heatmap(df.corr(), annot=False, cmap='Dark2_r', linewidths = 2)
     plt.title('Correlation between Vars')
     plt.savefig('./images/Corr_plot.png')
-
+    plt.close()
 
 
 
@@ -84,7 +84,7 @@ def encoder_helper(df, category_lst):
             X: pandas dataframe with new columns for
             y: target variables (binary)
     '''
-    y = df['Churn'] 
+    y = df['Churn']
     X = pd.DataFrame()
     
     # create target encoding for all categorical variables
@@ -152,6 +152,7 @@ def classification_report_file(y_train,
     plt.text(0.01, 0.7, str(classification_report(y_train, y_train_preds_rf)), {'fontsize': 14}, fontproperties = 'monospace') # approach improved by OP -> monospace!
     plt.axis('off')
     plt.savefig('./images/RandomForest_train_test_results.png')
+    plt.close()
 
     plt.rc('figure', figsize=(8, 6))
     plt.text(0.01, 1.25, str('Logistic Regression Train'), {'fontsize': 14}, fontproperties = 'monospace')
@@ -160,7 +161,7 @@ def classification_report_file(y_train,
     plt.text(0.01, 0.7, str(classification_report(y_test, y_test_preds_lr)), {'fontsize': 14}, fontproperties = 'monospace') # approach improved by OP -> monospace!
     plt.axis('off')
     plt.savefig('./images/Logistic_regression_train_test_results.png')
-    
+    plt.close()
 
 
 def feature_importance_plot(model, X_data, output_pth):
@@ -197,6 +198,27 @@ def feature_importance_plot(model, X_data, output_pth):
     
     # save plot
     plt.savefig(output_pth)
+    plt.close()
+
+def roc_curve(rf_model,lr_model,X_test,y_test):
+    """
+    create ROC curve for two models
+    input:
+              rf_model: randomforest model
+              lr_model: logistic regression model
+              X_test: X testing data
+              y_test: y testing data
+    output:
+              None
+    """
+    lrc_plot = plot_roc_curve(lr_model, X_test, y_test)
+    plt.figure(figsize=(15, 8))
+    ax = plt.gca()
+    rfc_disp = plot_roc_curve(rf_model, X_test, y_test, ax=ax, alpha=0.8)
+    lrc_plot.plot(ax=ax, alpha=0.8)
+    plt.savefig('./images/roc_curve.png')
+    plt.close()
+
 
 def train_models(X_train, X_test, y_train, y_test):
     '''
@@ -258,6 +280,8 @@ def train_models(X_train, X_test, y_train, y_test):
 if __name__=='__main__':
      # read in data
      df=import_data('./data/bank_data.csv')
+     # change target variable to 0->existing customer. 1-> chruned customer.
+     df['Churn']=df['Attrition_Flag'].apply(lambda val:0 if val=='Existing Customer' else 1)
      # eda analysis
      perform_eda(df)
      # list of categorical variables
@@ -270,5 +294,8 @@ if __name__=='__main__':
      y_test_preds_rf,y_train_preds_rf,y_test_preds_lr,y_train_preds_lr=train_models( X_train, X_test, y_train, y_test)
      # load back the best model (random forest)
      rfc_model = joblib.load('./models/rfc_model.pkl')
+     lr_model = joblib.load('./models/logistic_model.pkl')
+     # create roc curve
+     roc_curve(rfc_model,lr_model,X_test,y_test)
      # create feature importance plot
      feature_importance_plot(rfc_model,X,'./images/feature_importance_rf.png')
